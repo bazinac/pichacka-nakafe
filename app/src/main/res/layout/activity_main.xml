@@ -9,18 +9,20 @@
     tools:context=".Pichacka">
 
     <TextView
+        android:id="@+id/textView_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:layout_gravity="center_horizontal"
         android:autoLink="web"
-        android:text="hovno vole"
+        android:text="hovno se děje vole"
         android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/textView_explanation"
+        android:id="@+id/textView_caughtId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="gut" />
 
 

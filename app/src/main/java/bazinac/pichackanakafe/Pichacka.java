@@ -1,36 +1,43 @@
 package bazinac.pichackanakafe;
 
 import android.app.PendingIntent;
+
 import android.content.Intent;
 import android.content.IntentFilter;
+
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
-import android.nfc.tech.NfcA;
+
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import org.json.JSONObject;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.text.CollationElementIterator;
+import java.util.Calendar;
 
 public class Pichacka extends AppCompatActivity {
 
-    TextView mText;
-    NfcAdapter mAdapter;
-    PendingIntent mPendingIntent;
-    IntentFilter mFilters[];
-    String mTechLists[][];
+    TextView txt1;
+    TextView txt2;
+
+    NfcAdapter adapter;
+    PendingIntent pIntent;
+    IntentFilter filters[];
+    String techLists[][];
 
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
-    private TextView mTextView;
+
+    Calendar c = Calendar.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,13 +45,13 @@ public class Pichacka extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakelockTag");
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PichackaRezervace");
         wakeLock.acquire();
     }
 
     public void onDestroy(){
         super.onDestroy();
-        //wakeLock.release();
+        wakeLock.release();
     }
 
 
@@ -52,64 +59,35 @@ public class Pichacka extends AppCompatActivity {
     public void onStart(){
             super.onStart();
 
-            mText = (TextView) findViewById(R.id.text);
+            txt1 = (TextView) findViewById(R.id.text);
 
-            mAdapter = NfcAdapter.getDefaultAdapter(this);
+            adapter = NfcAdapter.getDefaultAdapter(this);
 
 
-            if (mAdapter == null) {
+            if (adapter == null) {
                 Toast.makeText(this, "NFC nefunguje sakra!.", Toast.LENGTH_LONG).show();
                 finish();
                 return;
              }
 
-            mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+            pIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
 
-            mTechLists =  new String[][] {
+            techLists =  new String[][] {
                 new String[] { Ndef.class.getName() },
-         };
+             };
 
 
             IntentFilter f = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
 
-
-            mFilters = new IntentFilter[] {
+            filters = new IntentFilter[] {
                     f
             };
 
-
-
-        // tady se to opakuje, dořešit
-
+            // pro pripad ze intent appku nastartoval
             Intent intent = getIntent();
-            Log.i("intent: ","jede intent" + intent + intent.getAction());
+            Log.i("intent: ","(onstart)" + intent + intent.getAction());
 
-
-        if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())){
-
-
-            //byte[] tagId = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
-
-
-
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            byte[] id = tag.getId();
-            ByteBuffer wrapped = ByteBuffer.wrap(id);
-            wrapped.order(ByteOrder.LITTLE_ENDIAN);
-            int signedInt = wrapped.getInt();
-            Long number = signedInt & 0xffffffffl;
-
-
-
-            String t = number.toString();
-
-            mTextView = (TextView) findViewById(R.id.textView_explanation);
-            mTextView.setText(t);
-
-            Log.i("ID: ", t);
-            Toast.makeText(this, "Captured ID ->." + t, Toast.LENGTH_LONG).show();
-
-        };
+            parseIntent(intent);
 
     };
 
@@ -119,28 +97,30 @@ public class Pichacka extends AppCompatActivity {
     public void onResume(){
         super.onResume();
 
-        if (mAdapter != null)
-            mAdapter.enableForegroundDispatch(this, mPendingIntent, mFilters, mTechLists);
+        if (adapter != null)
+            adapter.enableForegroundDispatch(this, pIntent, filters, techLists);
     }
 
     @Override
     public void onPause(){
         super.onPause();
-        if (mAdapter != null)
-            mAdapter.disableForegroundDispatch(this);
+        if (adapter != null)
+            adapter.disableForegroundDispatch(this);
     }
 
     @Override
     public void onNewIntent(Intent intent){
-        Log.i("intent: ","nalezen intent" + intent + intent.getAction());
-        //mText = (TextView) findViewById(R.id.text);
+        Log.i("intent: ","(onNew)" + intent + intent.getAction());
+        parseIntent(intent);
 
+
+    }
+    // metoda na zpracovani intentu TECH_DISCOVERED
+    private void parseIntent(Intent intent) {
         if(NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())){
 
 
-            //byte[] tagId = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
-
-
+            // tady by se mel osetrit vstup (mame fakt id?)
 
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             byte[] id = tag.getId();
@@ -149,22 +129,28 @@ public class Pichacka extends AppCompatActivity {
             int signedInt = wrapped.getInt();
             Long number = signedInt & 0xffffffffl;
 
+            String sID = number.toString();
+            long t = c.get(Calendar.MILLISECOND);
+
+            Log.i("ID: ", sID);
+
+            Coffee coffee = new Coffee(sID,t);
 
 
-            String t = number.toString();
 
-            mTextView = (TextView) findViewById(R.id.textView_explanation);
-            mTextView.setText(t);
-            
-            Log.i("ID: ", t);
-            Toast.makeText(this, "Captured ID ->." + t, Toast.LENGTH_LONG).show();
+
+            // UI AKCE
+            txt2 = (TextView) findViewById(R.id.textView_caughtId);
+            txt2.setText("got " + sID);
+
+
+
+
+
+
 
         }
-
-
-
-
-        //mText.setText(getNdefMessages(intent));
+        ;
     }
 
 
