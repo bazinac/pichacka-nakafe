@@ -19,6 +19,10 @@ public class Coffee {
     private long time;
 
 
+    public Coffee(){
+
+    }
+
     public Coffee(String dId, long t){
 
         SimpleDateFormat formatter = new SimpleDateFormat("d.M.yyyy H:mm:ss");
@@ -69,7 +73,7 @@ public class Coffee {
 
 
     // nakonec na JSON sereme
-    public Bundle getJSONBundle(){
+    public void getJSONBundle(){
 
         JSONObject json = new JSONObject();
 

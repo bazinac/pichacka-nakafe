@@ -1,7 +1,10 @@
 package bazinac.pichackanakafe;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 
@@ -11,23 +14,24 @@ import android.nfc.tech.Ndef;
 
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import org.json.JSONObject;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Calendar;
 
-public class Pichacka extends AppCompatActivity {
+
+public class Pichacka extends AppCompatActivity{
 
     TextView txt1;
     TextView txt2;
+    TextView txt3;
 
     NfcAdapter adapter;
     PendingIntent pIntent;
@@ -37,7 +41,9 @@ public class Pichacka extends AppCompatActivity {
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
 
-    Calendar c = Calendar.getInstance();
+    PendingIntent p2Intent;
+    DBhelper dbh;
+    MailDemon demon;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,11 +53,52 @@ public class Pichacka extends AppCompatActivity {
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PichackaRezervace");
         wakeLock.acquire();
+
+        demon = new MailDemon();
+
+        findViewById(R.id.sendLog).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mailLogDump();
+            }
+        });
+
+        findViewById(R.id.sendStats).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mailStatsDump();
+            }
+        });
+
+        findViewById(R.id.deleteAll).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(Pichacka.this)
+                        .setTitle("Dvakrát měř, jednou řež!")
+                        .setMessage("Fakt chceš vše smazat?")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                deleteLog();
+                                Toast.makeText(Pichacka.this, "A všecko je v prdeli, hehe", Toast.LENGTH_SHORT).show();
+                            }})
+                        .setNegativeButton(android.R.string.no, null).show();
+            }
+        });
+
+
+
+
+
+        dbh = new DBhelper(this);
+        //dbh.getWritableDatabase();
     }
 
     public void onDestroy(){
-        super.onDestroy();
         wakeLock.release();
+        super.onDestroy();
+
     }
 
 
@@ -65,7 +112,7 @@ public class Pichacka extends AppCompatActivity {
 
 
             if (adapter == null) {
-                Toast.makeText(this, "NFC nefunguje sakra!.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "NFC. nefunguje sakra!.", Toast.LENGTH_LONG).show();
                 finish();
                 return;
              }
@@ -89,8 +136,7 @@ public class Pichacka extends AppCompatActivity {
 
             parseIntent(intent);
 
-    };
-
+    }
 
 
     @Override
@@ -130,12 +176,13 @@ public class Pichacka extends AppCompatActivity {
             Long number = signedInt & 0xffffffffl;
 
             String sID = number.toString();
-            long t = c.get(Calendar.MILLISECOND);
+            long t = System.currentTimeMillis();
 
             Log.i("ID: ", sID);
 
             Coffee coffee = new Coffee(sID,t);
 
+            dbh.addCoffee(coffee);
 
 
 
@@ -143,14 +190,29 @@ public class Pichacka extends AppCompatActivity {
             txt2 = (TextView) findViewById(R.id.textView_caughtId);
             txt2.setText("got " + sID);
 
-
-
-
+            txt3 = (TextView) findViewById(R.id.textView_count);
+            txt3.setText("celkom: " + dbh.getCoffeesCount());
 
 
 
         }
-        ;
+    }
+
+
+    public void mailLogDump(){
+        demon.mailLogDump(this);
+
+    }
+
+    public void mailStatsDump(){
+        demon.mailStatsDump(this);
+
+    }
+
+
+    public void deleteLog(){
+        dbh.truncateCoffeeLog();
+
     }
 
 
