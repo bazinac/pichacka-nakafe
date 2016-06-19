@@ -202,12 +202,12 @@ public class Pichacka extends AppCompatActivity{
 
 
     public void mailLogDump(){
-        demon.mailLogDump(this);
+        demon.mailLogDump(this, sts.getRecipients());
 
     }
 
     public void mailStatsDump(){
-        demon.mailStatsDump(this);
+        demon.mailStatsDump(this, sts.getRecipients());
 
     }
 

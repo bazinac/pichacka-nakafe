@@ -18,7 +18,7 @@ public class MailDemon {
     DBhelper dbh;
 
 
-    public void mailStatsDump(Context context)
+    public void mailStatsDump(Context context, String recipients)
     {
 
         Log.i("dumpuju: ", "stats");
@@ -33,15 +33,16 @@ public class MailDemon {
         }
 
         try {
-            GMailSender sender = new GMailSender("bazinacdev@gmail.com", "poctivejturek");
-            sender.sendMail("dump kávy (statistika)",resString,"pichackaNaKafe@gmail.com","kuceravej@gmail.com");
+            GMailSender sender = new GMailSender("pichacka.nakafe@gmail.com", "poctivejturek");
+            sender.sendMail("dump kávy (statistika)",resString,"pichacka.nakafe@gmail.com",recipients);
+            Log.i("SendMail", "mail sent to> " + recipients);
         } catch (Exception e) {
             Log.e("SendMail", e.getMessage(), e);
         }
 
     }
 
-    public void mailLogDump(Context context)
+    public void mailLogDump(Context context, String recipients)
     {
 
         Log.i("dumpuju: ", "log");
@@ -56,8 +57,9 @@ public class MailDemon {
         }
 
         try {
-            GMailSender sender = new GMailSender("bazinacdev@gmail.com", "poctivejturek");
-            sender.sendMail("dump logu kávy",resString,"pichackaNaKafe@gmail.com","kuceravej@gmail.com");
+            GMailSender sender = new GMailSender("pichacka.nakafe@gmail.com", "poctivejturek");
+            sender.sendMail("dump kávy (log)",resString,"pichacka.nakafe@gmail.com",recipients);
+            Log.i("SendMail", "mail sent to> " + recipients);
         } catch (Exception e) {
             Log.e("SendMail", e.getMessage(), e);
         }

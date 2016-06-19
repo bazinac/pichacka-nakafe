@@ -22,6 +22,8 @@ public class SerialTranslatorService {
     // sId; jméno/cen
     private HashMap<String, String> userList;
 
+    private String mailString;
+
     public SerialTranslatorService(Context context){
 
         con = context;
@@ -34,6 +36,8 @@ public class SerialTranslatorService {
 
         userList = new HashMap<String, String>();
 
+        mailString = new String();
+
         try {
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(
                     con.openFileInput(USERLIST_FILE)));
@@ -45,8 +49,14 @@ public class SerialTranslatorService {
 
                 String[] strArr = inputString.split(";");
                 userList.put(strArr[0],strArr[1]);
+
+                mailString = mailString + strArr[2] + ",";
                 i++;
+
             }
+
+            mailString = mailString.substring(0,mailString.length()-1);
+
             Log.i("STranslatorServ: ","reload success, found recs: " + i);
 
         } catch (IOException e) {
@@ -71,6 +81,14 @@ public class SerialTranslatorService {
         else return sId;
     }
 
+    public String getRecipients(){
 
+        if (userList == null) {
+            reloadUserList();
+        }
+
+        return mailString;
+
+    }
 
 }
