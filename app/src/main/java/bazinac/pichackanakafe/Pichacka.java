@@ -44,6 +44,7 @@ public class Pichacka extends AppCompatActivity{
     PendingIntent p2Intent;
     DBhelper dbh;
     MailDemon demon;
+    SerialTranslatorService sts;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,7 @@ public class Pichacka extends AppCompatActivity{
         wakeLock.acquire();
 
         demon = new MailDemon();
+        sts = new SerialTranslatorService(this);
 
         findViewById(R.id.sendLog).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,9 +180,9 @@ public class Pichacka extends AppCompatActivity{
             String sID = number.toString();
             long t = System.currentTimeMillis();
 
-            Log.i("ID: ", sID);
+            Log.i("ID: ", sID + " user (" + sts.translateSerialToCen(sID) +  ")" );
 
-            Coffee coffee = new Coffee(sID,t);
+            Coffee coffee = new Coffee(sID, sts.translateSerialToCen(sID),t);
 
             dbh.addCoffee(coffee);
 
@@ -188,10 +190,10 @@ public class Pichacka extends AppCompatActivity{
 
             // UI AKCE
             txt2 = (TextView) findViewById(R.id.textView_caughtId);
-            txt2.setText("got " + sID);
+            txt2.setText("posledni kafe vypil user: " + sts.translateSerialToCen(sID));
 
             txt3 = (TextView) findViewById(R.id.textView_count);
-            txt3.setText("celkom: " + dbh.getCoffeesCount());
+            txt3.setText("celkem vypito kafe: " + dbh.getCoffeesCount());
 
 
 

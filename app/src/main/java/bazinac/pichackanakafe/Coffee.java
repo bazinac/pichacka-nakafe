@@ -23,7 +23,7 @@ public class Coffee {
 
     }
 
-    public Coffee(String dId, long t){
+    public Coffee(String dId, String c, long t){
 
         SimpleDateFormat formatter = new SimpleDateFormat("d.M.yyyy H:mm:ss");
         Calendar calendar = Calendar.getInstance();
@@ -32,7 +32,7 @@ public class Coffee {
 
         this.drinkerId = dId;
         this.timeStamp = formatter.format(calendar.getTime());
-        this.cen = translateIDtoCen();
+        this.cen = c;
         this.time = t;
 
 
@@ -95,9 +95,5 @@ public class Coffee {
 
 
 
-    //tady je potreba implementovat preklad drinker id na cen
-    private String translateIDtoCen(){
-        return drinkerId;
-    }
 
 }

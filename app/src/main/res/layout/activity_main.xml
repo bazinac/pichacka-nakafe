@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:orientation="vertical"
+    android:background="@color/colorCoffee"
     tools:context=".Pichacka">
 
     <TextView
@@ -15,8 +16,9 @@
         android:layout_margin="10dp"
         android:layout_gravity="center_horizontal"
         android:autoLink="web"
-        android:text="Hlavní menu, všecko šlape"
-        android:textStyle="bold"/>
+        android:textColor="@color/colorPepe"
+        android:text="Status: všecko snad šlape"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textView_caughtId"
@@ -32,12 +34,6 @@
         android:layout_gravity="center_horizontal"
         android:text="" />
 
-    <TextView
-        android:id="@+id/textView_alarmregister"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="" />
 
     <Button
         android:id="@+id/sendStats"
@@ -66,10 +62,21 @@
         android:layout_marginBottom="20dp"
         android:text="Smazat fakin databázi" />
 
+    <TextView
+        android:id="@+id/textView_creditz"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_below="@+id/imageView1"
+        android:text="brougt by chief coffee connoisseur pepe bazinac" />
+
     <ImageView
         android:id="@+id/imageView1"
+        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/pepecof" />
+
+
 
 </LinearLayout>
