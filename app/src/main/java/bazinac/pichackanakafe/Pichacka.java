@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.media.MediaPlayer;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
@@ -185,7 +186,7 @@ public class Pichacka extends AppCompatActivity{
             Coffee coffee = new Coffee(sID, sts.translateSerialToCen(sID),t);
 
             dbh.addCoffee(coffee);
-
+            int cofCount = dbh.getCoffeesCount();
 
 
             // UI AKCE
@@ -193,7 +194,21 @@ public class Pichacka extends AppCompatActivity{
             txt2.setText("posledni kafe vypil user: " + sts.translateSerialToCen(sID));
 
             txt3 = (TextView) findViewById(R.id.textView_count);
-            txt3.setText("celkem vypito kafe: " + dbh.getCoffeesCount());
+            txt3.setText("celkem vypito kafe: " + cofCount);
+
+
+            // easter egg
+            if ( ( cofCount % 33 ) == 0 )
+            {
+                MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.kavusiosladim);
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
+                    public void onCompletion(MediaPlayer player) {
+                        player.release();
+                    }});
+
+                mp.start();
+
+            }
 
 
 
